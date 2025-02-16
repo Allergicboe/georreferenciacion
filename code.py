@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Georreferenciación de Campos",
+    page_title="Geocoding App",
     page_icon="🌍",
     layout="wide"
 )
@@ -161,7 +161,7 @@ def update_google_sheets(gc, final_results):
         return False
 
 def main():
-    st.title("🌍 Geocoding App")
+    st.title("🌍 Georreferenciación de Campos")
     st.write("Esta aplicación georreferencia automáticamente las ubicaciones desde Google Sheets")
     
     # Mostrar estado de la descarga de shapefiles
