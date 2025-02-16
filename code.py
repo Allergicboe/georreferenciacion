@@ -162,7 +162,7 @@ def update_google_sheets(gc, final_results):
 
 def main():
     st.title("🌍 Georreferenciación de Campos")
-    st.write("Esta aplicación georreferencia automáticamente las ubicaciones usando archivos shape de Chile y Perú. Si la coordenada está a 100 km de cualquier punto, se catalogará como "OTROS".")
+    st.write("""Esta aplicación georreferencia automáticamente las ubicaciones usando archivos shape de Chile y Perú. Si la coordenada está a 100 km de cualquier punto, se catalogará como "OTROS".""")
     
     # Mostrar estado de la descarga de shapefiles
     with st.spinner("Descargando archivos shape..."):
