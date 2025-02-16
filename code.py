@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Geocoding App",
+    page_title="Georreferenciación de Campos",
     page_icon="🌍",
     layout="wide"
 )
@@ -191,7 +191,7 @@ def main():
                 with col2:
                     st.metric("Coordenadas Válidas", valid_count)
                 with col3:
-                    st.metric("Coordenadas Inválidas", invalid_count)
+                    st.metric("Casillas Inválidas", invalid_count)
             
             # Actualizar Google Sheets
             with st.spinner("Actualizando Google Sheets..."):
@@ -199,7 +199,7 @@ def main():
                     st.success("✅ Proceso completado exitosamente!")
                     
                     # Mostrar preview de resultados
-                    st.subheader("📊 Preview de Resultados")
+                    st.subheader("📊 Previsualización de resultados")
                     st.dataframe(
                         final_results[['original_index', 'Region', 'Provincia', 'Comuna']]
                         .sort_values('original_index')
