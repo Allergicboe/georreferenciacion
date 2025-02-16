@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Geocoding App",
+    page_title="Georreferenciación de Campos",
     page_icon="🌍",
     layout="wide"
 )
