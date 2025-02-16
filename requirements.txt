@@ -1,0 +1,11 @@
+streamlit
+os
+gdown
+geopandas
+pandas
+numpy
+shapely
+scipy
+gspread
+google-auth
+concurrent.futures
