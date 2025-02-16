@@ -8,3 +8,5 @@ gdown==5.1.0
 gspread==6.0.2
 google-auth==2.27.0
 google-auth-oauthlib==1.2.0
+fiona==1.9.5
+pyproj==3.6.1
