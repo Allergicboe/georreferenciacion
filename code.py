@@ -40,9 +40,6 @@ file_urls = {
     "combined.shx": "https://drive.google.com/uc?id=1MfeWFsxlA7EUR3sxnC3WC--ukevrMei8"
 }
 
-# URL de Google Sheets
-SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1_74Vt8KL0bscmSME5Evm6hn4DWytLdGDGb98tHyNwtc/edit?usp=drive_link'
-
 @st.cache_resource
 def download_shapefiles():
     """Descarga los archivos shape y retorna la ruta del directorio"""
@@ -68,17 +65,30 @@ def vectorized_parse_coordinates(series):
     series[mask] = series[mask] / 100000000.0
     return series
 
-def init_google_sheets():
-    """Inicializa la conexión con Google Sheets"""
-    # Crear credenciales desde los secretos de Streamlit
-    credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=[
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
-        ],
-    )
-    return gspread.authorize(credentials)
+# --- 2. Funciones de Conexión y Carga de Datos ---
+def init_connection():
+    """Función para inicializar la conexión con Google Sheets."""
+    try:
+        credentials = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=[
+                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive'
+            ]
+        )
+        client = gspread.authorize(credentials)
+        return client
+    except Exception as e:
+        st.error(f"Error en la conexión: {str(e)}")
+        return None
+
+def load_sheet(client):
+    """Función para cargar la hoja de trabajo de Google Sheets."""
+    try:
+        return client.open_by_url(st.secrets["spreadsheet_url"]).sheet1
+    except Exception as e:
+        st.error(f"Error al cargar la planilla: {str(e)}")
+        return None
 
 def process_data(data, gdf):
     """Procesa los datos y realiza la georreferenciación"""
@@ -130,7 +140,7 @@ def process_data(data, gdf):
 def update_google_sheets(gc, final_results):
     """Actualiza Google Sheets con los resultados"""
     try:
-        sheet = gc.open_by_url(SPREADSHEET_URL).sheet1
+        sheet = gc.open_by_url(spreadsheet_url).sheet1
         
         # Preparar actualizaciones en lotes
         BATCH_SIZE = 1000
@@ -176,7 +186,7 @@ def main():
         try:
             with st.spinner("Conectando con Google Sheets..."):
                 gc = init_google_sheets()
-                sheet = gc.open_by_url(SPREADSHEET_URL).sheet1
+                sheet = gc.open_by_url(spreadsheet_url).sheet1
                 data = pd.DataFrame(sheet.get_all_records())
                 st.success(f"✅ Datos cargados: {len(data)} filas")
             
