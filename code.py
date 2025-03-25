@@ -25,28 +25,6 @@ st.set_page_config(
     layout="wide"
 )
 
-    # Botón para abrir la planilla de Google
-    html_button = f"""
-    <div style="text-align: left; margin-bottom: 10px;">
-        <a href="{sheet_url}" target="_blank">
-            <button style="
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 14px;
-                border-radius: 5px;
-                cursor: pointer;">
-                Abrir Planilla de Google
-            </button>
-        </a>
-    </div>
-    """
-    components.html(html_button, height=50)
-
 # -------------------------------
 # FUNCIONES AUXILIARES
 # -------------------------------
