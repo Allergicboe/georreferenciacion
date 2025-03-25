@@ -61,7 +61,7 @@ def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
     """
     Actualiza o agrega ingresos en la hoja "Datos":
       - Identifica la fila por la fecha (columna A) en formato DD-MM-YYYY.
-      - Actualiza o agrega el valor del Ingreso (columna H) y la Razón (columna I).
+      - Actualiza o agrega el Ingreso (columna H) y la Razón (columna I).
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
     fila_existente = buscar_fila_por_fecha(fecha_str)
@@ -84,7 +84,7 @@ if st.button("Abrir Planilla"):
 tab1, tab2 = st.tabs(["Gastos", "Ingresos"])
 
 with tab1:
-    st.header("Ingreso de Datos de Producto/Servicio")
+    st.header("Ingreso de Gastos")
     fecha = st.date_input("Selecciona la fecha", value=datetime.today())
     nombre = st.text_input("Nombre")
     prod_serv = st.selectbox("Selecciona Producto o Servicio", options=["Producto", "Servicio"])
@@ -100,7 +100,7 @@ with tab1:
 with tab2:
     st.header("Ingreso de Ingresos")
     fecha_ingreso = st.date_input("Selecciona la fecha", key="fecha_ingreso", value=datetime.today())
-    ingreso = st.text_input("Valor del Ingreso", key="valor_ingreso")
+    ingreso = st.text_input("Ingreso", key="valor_ingreso")
     razon = st.text_input("Razón", key="razon_ingreso")
     
     if st.button("Enviar Ingreso", key="ingreso"):
