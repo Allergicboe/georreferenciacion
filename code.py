@@ -50,37 +50,38 @@ def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
     if fila_existente:
         # Actualiza únicamente las columnas E, F y G
         hoja_datos.update_cell(fila_existente, 5, nombre)      # Columna E: Nombre
-        hoja_datos.update_cell(fila_existente, 6, prod_serv)   # Columna F: Producto/Servicio
-        hoja_datos.update_cell(fila_existente, 7, precio)      # Columna G: Precio
+        hoja_datos.update_cell(fila_existente, 6, prod_serv)     # Columna F: Producto/Servicio
+        hoja_datos.update_cell(fila_existente, 7, precio)        # Columna G: Precio
     else:
         # Se agrega una nueva fila: se completa la columna A con la fecha y las columnas E, F y G
-        nueva_fila = [fecha_str, "", "", "", nombre, prod_serv, precio, ""]
+        nueva_fila = [fecha_str, "", "", "", nombre, prod_serv, precio, "", ""]
         hoja_datos.append_row(nueva_fila)
 
-def agregar_o_actualizar_ingreso(fecha, ingreso):
+def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
     """
     Actualiza o agrega ingresos en la hoja "Datos":
       - Identifica la fila por la fecha (columna A) en formato DD-MM-YYYY.
-      - Actualiza o agrega el valor del Ingreso (columna H).
+      - Actualiza o agrega el valor del Ingreso (columna H) y la Razón (columna I).
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
     fila_existente = buscar_fila_por_fecha(fecha_str)
     
     if fila_existente:
         hoja_datos.update_cell(fila_existente, 8, ingreso)  # Columna H: Ingreso
+        hoja_datos.update_cell(fila_existente, 9, razon)    # Columna I: Razón
     else:
-        nueva_fila = [fecha_str, "", "", "", "", "", "", ingreso]
+        nueva_fila = [fecha_str, "", "", "", "", "", "", ingreso, razon]
         hoja_datos.append_row(nueva_fila)
 
 # -------------------------------
 # INTERFAZ DE USUARIO CON STREAMLIT
 # -------------------------------
-st.title("Aplicación de Gestión de Datos e Ingresos")
+st.title("Gastos e Ingresos")
 
 if st.button("Abrir Planilla"):
     st.markdown(f"[Ir a la Planilla]({sheet_url})", unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["Agregar/Actualizar Datos", "Agregar/Actualizar Ingresos"])
+tab1, tab2 = st.tabs(["Gastos", "Ingresos"])
 
 with tab1:
     st.header("Ingreso de Datos de Producto/Servicio")
@@ -100,10 +101,11 @@ with tab2:
     st.header("Ingreso de Ingresos")
     fecha_ingreso = st.date_input("Selecciona la fecha", key="fecha_ingreso", value=datetime.today())
     ingreso = st.text_input("Valor del Ingreso", key="valor_ingreso")
+    razon = st.text_input("Razón", key="razon_ingreso")
     
     if st.button("Enviar Ingreso", key="ingreso"):
         try:
-            agregar_o_actualizar_ingreso(fecha_ingreso, ingreso)
+            agregar_o_actualizar_ingreso(fecha_ingreso, ingreso, razon)
             st.success("Ingreso agregado/actualizado correctamente.")
         except Exception as e:
             st.error(f"Ocurrió un error: {e}")
