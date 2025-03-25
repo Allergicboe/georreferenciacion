@@ -18,6 +18,13 @@ sheet_url = st.secrets["sheet"]["url"]
 # Seleccionar la hoja llamada "Datos"
 hoja_datos = client.open_by_url(sheet_url).worksheet("Datos")
 
+# Configuración de la página
+st.set_page_config(
+    page_title="Gastos e Ingresos",
+    page_icon="⚙️",
+    layout="wide"
+)
+
 # -------------------------------
 # FUNCIONES AUXILIARES
 # -------------------------------
