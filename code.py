@@ -45,6 +45,14 @@ def buscar_ultima_fila_por_fecha(fecha_str):
 # -------------------------------
 # FUNCIONES PARA ACTUALIZAR DATOS
 # -------------------------------
+def limpiar_valor(valor):
+    """
+    Elimina el primer carácter si es una comilla simple.
+    """
+    if valor and valor.startswith("'"):
+        return valor[1:]
+    return valor
+
 def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
     """
     Agrega datos en la hoja "Datos" para Producto/Servicio.
@@ -63,15 +71,14 @@ def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
         mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
         dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
         
-        # Eliminar apostrofe inicial en el mes (si lo hubiera)
-        mes_val = mes_val.lstrip("'")
+        # Eliminar comilla simple inicial en el mes (si la hubiera)
+        mes_val = limpiar_valor(mes_val)
         
         # Crear la nueva fila copiando A-D y agregando los datos en E, F y G
         new_row = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
         # Insertar la nueva fila justo debajo de la última fila encontrada
         hoja_datos.insert_row(new_row, fila_existente + 1)
     else:
-        # Si no existe ninguna fila con esa fecha, se crea una nueva fila con los datos completos
         fecha_val = fecha.strftime("%d-%m-%Y")
         anio_val = fecha.strftime("%Y")
         mes_val = fecha.strftime("%m")
@@ -96,8 +103,8 @@ def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
         mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
         dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
         
-        # Eliminar apostrofe inicial en el mes (si lo hubiera)
-        mes_val = mes_val.lstrip("'")
+        # Eliminar comilla simple inicial en el mes (si la hubiera)
+        mes_val = limpiar_valor(mes_val)
         
         new_row = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
         hoja_datos.insert_row(new_row, fila_existente + 1)
