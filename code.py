@@ -36,19 +36,10 @@ def buscar_ultima_fila_por_fecha(fecha_str):
     """
     fechas = hoja_datos.col_values(1)
     fila_encontrada = None
-    # Se asume que la primera fila es encabezado, por eso se recorre desde la segunda fila
     for idx, valor in enumerate(fechas[1:], start=2):
         if valor == fecha_str:
             fila_encontrada = idx
     return fila_encontrada
-
-def limpiar_mes(valor):
-    """
-    Elimina cualquier carácter de comilla simple al inicio (tanto ' como ’).
-    """
-    if valor:
-        return valor.lstrip("'’")
-    return valor
 
 # -------------------------------
 # FUNCIONES PARA ACTUALIZAR DATOS
@@ -57,65 +48,85 @@ def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
     """
     Agrega datos en la hoja "Datos" para Producto/Servicio.
     Si ya existe una fila con la fecha seleccionada, se inserta una nueva fila debajo de la última ocurrencia,
-    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día) y eliminando cualquier comilla simple inicial en Mes.
-    Los datos nuevos se colocan en las columnas E, F y G.
+    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día) de la fila encontrada.
+    Luego se actualiza la nueva fila usando update_cells con USER_ENTERED.
+    Si no existe la fecha, se agrega una nueva fila al final.
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
     fila_existente = buscar_ultima_fila_por_fecha(fecha_str)
     
+    # Valores de las columnas A-D a copiar o generar
+    fecha_val = fecha_str
+    anio_val = fecha.strftime("%Y")
+    mes_val = fecha.strftime("%m")
+    dia_val = fecha.strftime("%d")
+    
     if fila_existente:
-        # Obtener los valores de las columnas A-D de la fila encontrada
+        # Si ya existe la fecha, obtenemos la fila y copiamos A-D
         existing_row = hoja_datos.row_values(fila_existente)
-        fecha_val = existing_row[0] if len(existing_row) >= 1 else fecha_str
-        anio_val = existing_row[1] if len(existing_row) >= 2 else fecha.strftime("%Y")
-        mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
-        dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
+        if len(existing_row) >= 1 and existing_row[0]:
+            fecha_val = existing_row[0]
+        if len(existing_row) >= 2 and existing_row[1]:
+            anio_val = existing_row[1]
+        if len(existing_row) >= 3 and existing_row[2]:
+            mes_val = existing_row[2]
+        if len(existing_row) >= 4 and existing_row[3]:
+            dia_val = existing_row[3]
         
-        # Eliminar comillas simples iniciales en el mes (si las hubiera)
-        mes_val = limpiar_mes(mes_val)
+        # Insertar una fila vacía justo debajo de la última ocurrencia
+        nueva_pos = fila_existente + 1
+        hoja_datos.insert_row([""] * 9, nueva_pos)
         
-        # Crear la nueva fila copiando A-D y agregando los datos en E, F y G
-        new_row = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
-        # Insertar la nueva fila justo debajo de la última fila encontrada
-        hoja_datos.insert_row(new_row, fila_existente + 1)
+        # Construir la nueva fila con los datos a insertar
+        new_values = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
+        # Obtener el rango de celdas correspondiente a la nueva fila
+        cells = hoja_datos.range(nueva_pos, 1, nueva_pos, len(new_values))
+        for i, cell in enumerate(cells):
+            cell.value = new_values[i]
+        hoja_datos.update_cells(cells, value_input_option='USER_ENTERED')
     else:
-        # Si no existe ninguna fila con esa fecha, se crea una nueva fila con los datos completos
-        fecha_val = fecha.strftime("%d-%m-%Y")
-        anio_val = fecha.strftime("%Y")
-        mes_val = fecha.strftime("%m")
-        dia_val = fecha.strftime("%d")
+        # Si no existe la fecha, se crea una nueva fila completa
         nueva_fila = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
-        hoja_datos.append_row(nueva_fila)
+        hoja_datos.append_row(nueva_fila, value_input_option='USER_ENTERED')
 
 def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
     """
     Agrega ingresos en la hoja "Datos".
     Si ya existe una fila con la fecha seleccionada, se inserta una nueva fila debajo de la última ocurrencia,
-    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día) y eliminando cualquier comilla simple inicial en Mes.
-    Los nuevos datos se colocan en las columnas H (Ingreso) e I (Razón).
+    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día) de la fila encontrada.
+    Luego se actualiza la nueva fila usando update_cells con USER_ENTERED.
+    Si no existe la fecha, se agrega una nueva fila al final.
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
     fila_existente = buscar_ultima_fila_por_fecha(fecha_str)
     
+    fecha_val = fecha_str
+    anio_val = fecha.strftime("%Y")
+    mes_val = fecha.strftime("%m")
+    dia_val = fecha.strftime("%d")
+    
     if fila_existente:
         existing_row = hoja_datos.row_values(fila_existente)
-        fecha_val = existing_row[0] if len(existing_row) >= 1 else fecha_str
-        anio_val = existing_row[1] if len(existing_row) >= 2 else fecha.strftime("%Y")
-        mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
-        dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
+        if len(existing_row) >= 1 and existing_row[0]:
+            fecha_val = existing_row[0]
+        if len(existing_row) >= 2 and existing_row[1]:
+            anio_val = existing_row[1]
+        if len(existing_row) >= 3 and existing_row[2]:
+            mes_val = existing_row[2]
+        if len(existing_row) >= 4 and existing_row[3]:
+            dia_val = existing_row[3]
         
-        # Eliminar comillas simples iniciales en el mes (si las hubiera)
-        mes_val = limpiar_mes(mes_val)
+        nueva_pos = fila_existente + 1
+        hoja_datos.insert_row([""] * 9, nueva_pos)
         
-        new_row = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
-        hoja_datos.insert_row(new_row, fila_existente + 1)
+        new_values = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
+        cells = hoja_datos.range(nueva_pos, 1, nueva_pos, len(new_values))
+        for i, cell in enumerate(cells):
+            cell.value = new_values[i]
+        hoja_datos.update_cells(cells, value_input_option='USER_ENTERED')
     else:
-        fecha_val = fecha.strftime("%d-%m-%Y")
-        anio_val = fecha.strftime("%Y")
-        mes_val = fecha.strftime("%m")
-        dia_val = fecha.strftime("%d")
         nueva_fila = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
-        hoja_datos.append_row(nueva_fila)
+        hoja_datos.append_row(nueva_fila, value_input_option='USER_ENTERED')
 
 # -------------------------------
 # INTERFAZ DE USUARIO CON STREAMLIT
