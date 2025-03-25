@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components  # Importa components para mostrar HTML
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -85,8 +86,27 @@ def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
 # -------------------------------
 st.title("Gastos e Ingresos")
 
-if st.button("Abrir Planilla"):
-    st.markdown(f"[Ir a la Planilla]({sheet_url})", unsafe_allow_html=True)
+# Botón HTML para ir a la planilla
+html_button = f"""
+<div style="text-align: left; margin-bottom: 10px;">
+    <a href="{sheet_url}" target="_blank">
+        <button style="
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;">
+            Abrir Planilla de Google
+        </button>
+    </a>
+</div>
+"""
+components.html(html_button, height=50)
 
 tab1, tab2 = st.tabs(["Gastos", "Ingresos"])
 
