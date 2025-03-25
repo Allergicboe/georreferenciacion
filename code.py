@@ -63,6 +63,9 @@ def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
         mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
         dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
         
+        # Eliminar apostrofe inicial en el mes (si lo hubiera)
+        mes_val = mes_val.lstrip("'")
+        
         # Crear la nueva fila copiando A-D y agregando los datos en E, F y G
         new_row = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
         # Insertar la nueva fila justo debajo de la última fila encontrada
@@ -92,6 +95,9 @@ def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
         anio_val = existing_row[1] if len(existing_row) >= 2 else fecha.strftime("%Y")
         mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
         dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
+        
+        # Eliminar apostrofe inicial en el mes (si lo hubiera)
+        mes_val = mes_val.lstrip("'")
         
         new_row = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
         hoja_datos.insert_row(new_row, fila_existente + 1)
