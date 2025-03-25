@@ -1,5 +1,5 @@
 import streamlit as st
-import streamlit.components.v1 as components  # Importa components para mostrar HTML
+import streamlit.components.v1 as components  # Para renderizar HTML
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -29,56 +29,78 @@ st.set_page_config(
 # -------------------------------
 # FUNCIONES AUXILIARES
 # -------------------------------
-def buscar_fila_por_fecha(fecha_str):
+def buscar_ultima_fila_por_fecha(fecha_str):
     """
-    Busca en la columna A de la hoja "Datos" la fila que contenga la fecha indicada (formato DD-MM-YYYY).
-    Retorna el índice de la fila (1-indexado) si se encuentra, o None en caso contrario.
+    Busca en la columna A de la hoja "Datos" todas las filas que contengan la fecha indicada (formato DD-MM-YYYY).
+    Retorna el índice (1-indexado) de la última ocurrencia o None si no se encuentra.
     """
     fechas = hoja_datos.col_values(1)
-    for idx, valor in enumerate(fechas[1:], start=2):  # se asume que la primera fila es encabezado
+    fila_encontrada = None
+    # Se asume que la primera fila es encabezado, por eso se recorre desde la segunda fila
+    for idx, valor in enumerate(fechas[1:], start=2):
         if valor == fecha_str:
-            return idx
-    return None
+            fila_encontrada = idx
+    return fila_encontrada
 
 # -------------------------------
 # FUNCIONES PARA ACTUALIZAR DATOS
 # -------------------------------
 def agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio):
     """
-    Actualiza o agrega datos en la hoja "Datos" para Producto/Servicio:
-      - Identifica la fila por la fecha (columna A) en formato DD-MM-YYYY.
-      - Actualiza o agrega los siguientes campos:
-          E) Nombre
-          F) Producto/Servicio
-          G) Precio
+    Agrega datos en la hoja "Datos" para Producto/Servicio.
+    Si ya existe una fila con la fecha seleccionada, se inserta una nueva fila debajo de la última ocurrencia,
+    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día).
+    Los datos nuevos se colocan en las columnas E, F y G.
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
-    fila_existente = buscar_fila_por_fecha(fecha_str)
+    fila_existente = buscar_ultima_fila_por_fecha(fecha_str)
     
     if fila_existente:
-        # Actualiza únicamente las columnas E, F y G
-        hoja_datos.update_cell(fila_existente, 5, nombre)      # Columna E: Nombre
-        hoja_datos.update_cell(fila_existente, 6, prod_serv)     # Columna F: Producto/Servicio
-        hoja_datos.update_cell(fila_existente, 7, precio)        # Columna G: Precio
+        # Obtener los valores de las columnas A-D de la fila encontrada
+        existing_row = hoja_datos.row_values(fila_existente)
+        fecha_val = existing_row[0] if len(existing_row) >= 1 else fecha_str
+        anio_val = existing_row[1] if len(existing_row) >= 2 else fecha.strftime("%Y")
+        mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
+        dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
+        
+        # Crear la nueva fila copiando A-D y agregando los datos en E, F y G
+        new_row = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
+        # Insertar la nueva fila justo debajo de la última fila encontrada
+        hoja_datos.insert_row(new_row, fila_existente + 1)
     else:
-        # Se agrega una nueva fila: se completa la columna A con la fecha y las columnas E, F y G
-        nueva_fila = [fecha_str, "", "", "", nombre, prod_serv, precio, "", ""]
+        # Si no existe ninguna fila con esa fecha, se crea una nueva fila con los datos completos
+        fecha_val = fecha.strftime("%d-%m-%Y")
+        anio_val = fecha.strftime("%Y")
+        mes_val = fecha.strftime("%m")
+        dia_val = fecha.strftime("%d")
+        nueva_fila = [fecha_val, anio_val, mes_val, dia_val, nombre, prod_serv, precio, "", ""]
         hoja_datos.append_row(nueva_fila)
 
 def agregar_o_actualizar_ingreso(fecha, ingreso, razon):
     """
-    Actualiza o agrega ingresos en la hoja "Datos":
-      - Identifica la fila por la fecha (columna A) en formato DD-MM-YYYY.
-      - Actualiza o agrega el Ingreso (columna H) y la Razón (columna I).
+    Agrega ingresos en la hoja "Datos".
+    Si ya existe una fila con la fecha seleccionada, se inserta una nueva fila debajo de la última ocurrencia,
+    copiando las columnas A (Fecha), B (Año), C (Mes) y D (Día).
+    Los nuevos datos se colocan en las columnas H (Ingreso) e I (Razón).
     """
     fecha_str = fecha.strftime("%d-%m-%Y")
-    fila_existente = buscar_fila_por_fecha(fecha_str)
+    fila_existente = buscar_ultima_fila_por_fecha(fecha_str)
     
     if fila_existente:
-        hoja_datos.update_cell(fila_existente, 8, ingreso)  # Columna H: Ingreso
-        hoja_datos.update_cell(fila_existente, 9, razon)    # Columna I: Razón
+        existing_row = hoja_datos.row_values(fila_existente)
+        fecha_val = existing_row[0] if len(existing_row) >= 1 else fecha_str
+        anio_val = existing_row[1] if len(existing_row) >= 2 else fecha.strftime("%Y")
+        mes_val = existing_row[2] if len(existing_row) >= 3 else fecha.strftime("%m")
+        dia_val = existing_row[3] if len(existing_row) >= 4 else fecha.strftime("%d")
+        
+        new_row = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
+        hoja_datos.insert_row(new_row, fila_existente + 1)
     else:
-        nueva_fila = [fecha_str, "", "", "", "", "", "", ingreso, razon]
+        fecha_val = fecha.strftime("%d-%m-%Y")
+        anio_val = fecha.strftime("%Y")
+        mes_val = fecha.strftime("%m")
+        dia_val = fecha.strftime("%d")
+        nueva_fila = [fecha_val, anio_val, mes_val, dia_val, "", "", "", ingreso, razon]
         hoja_datos.append_row(nueva_fila)
 
 # -------------------------------
@@ -120,7 +142,7 @@ with tab1:
     if st.button("Enviar Datos", key="datos"):
         try:
             agregar_o_actualizar_dato(fecha, nombre, prod_serv, precio)
-            st.success("Datos agregados/actualizados correctamente.")
+            st.success("Datos agregados correctamente.")
         except Exception as e:
             st.error(f"Ocurrió un error: {e}")
 
@@ -133,6 +155,6 @@ with tab2:
     if st.button("Enviar Ingreso", key="ingreso"):
         try:
             agregar_o_actualizar_ingreso(fecha_ingreso, ingreso, razon)
-            st.success("Ingreso agregado/actualizado correctamente.")
+            st.success("Ingreso agregado correctamente.")
         except Exception as e:
             st.error(f"Ocurrió un error: {e}")
